@@ -1,6 +1,7 @@
 <?php
 $hlm = "Home";
 if(uri_string()!=""){
+  $uri = explode("/", uri_string());
   $hlm = ucwords(uri_string());
 }
 ?>
@@ -53,14 +54,14 @@ if(uri_string()!=""){
   <main id="main" class="main">
 
     <div class="pagetitle">
-    <h1>Home</h1>
+    <h1><?= $hlm ?></h1>
       <nav>
       <ol class="breadcrumb">
-      <li class="breadcrumb-item">Home</li>
+      <li class="breadcrumb-item"><a href="<?= base_url() ?>">Home</a></li>
       <?php
 	    if($hlm!="Home"){
 	  ?>
-	  <li class="breadcrumb-item"><?php echo $hlm?></li> 
+	  <li class="breadcrumb-item active"><?php echo $hlm?></li> 
 	  <?php
 	  }
       ?> 
