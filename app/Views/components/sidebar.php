@@ -44,13 +44,6 @@
             </a>
         </li>
 
-        <li class="nav-item">
-            <a class="nav-link <?= (uri_string() == 'contact') ? '' : 'collapsed' ?>" href="<?= base_url('contact') ?>">
-                <i class="bi bi-envelope-fill"></i>
-                <span>Contact</span>
-            </a>
-        </li><!-- End Contact Nav -->
-
     </ul>
 
 </aside><!-- End Sidebar-->

@@ -6,6 +6,10 @@
         <?= form_open('buy', 'class="row g-3"') ?>
         <?= form_hidden('username', session()->get('username')) ?>
         <?= form_input(['type' => 'hidden', 'name' => 'total_harga', 'id' => 'total_harga', 'value' => '']) ?>
+        <?= form_input(['type' => 'hidden', 'name' => 'biaya_admin', 'id' => 'biaya_admin', 'value' => '']) ?> 
+        <?= form_input(['type' => 'hidden', 'name' => 'ppn', 'id' => 'ppn', 'value' => '']) ?> 
+        <?= form_input(['type' => 'hidden', 'name' => 'grand_total', 'id' => 'grand_total', 'value' => '']) ?> 
+
         <div class="col-12">
             <label for="nama" class="form-label">Nama</label>
             <input type="text" class="form-control" id="nama" value="<?php echo session()->get('username'); ?>">
@@ -58,14 +62,30 @@
                     ?>
                     <tr>
                         <td colspan="2"></td>
-                        <td>Subtotal</td>
+                        <td><strong>Subtotal</strong></td>
                         <td><?php echo number_to_currency($total, 'IDR') ?></td>
                     </tr>
-                    <tr>
-                        <td colspan="2"></td>
-                        <td>Total</td>
-                        <td><span id="total"><?php echo number_to_currency($total, 'IDR') ?></span></td>
-                    </tr>
+<tr>
+    <td colspan="2"></td>
+    <td>PPN (11%)</td>
+    <td><span id="ppn_tampil">IDR 0</span></td>
+</tr>
+<tr>
+    <td colspan="2"></td>
+    <td>Biaya Admin</td>
+    <td><span id="biaya_admin_tampil">IDR 0</span></td>
+</tr>
+<tr>
+    <td colspan="2"></td>
+    <td>Ongkir</td>
+    <td><span id="ongkir_tampil">IDR 0</span></td>
+</tr>
+<tr>
+    <td colspan="2"></td>
+    <th>Grand Total</th>
+    <th><span id="grand_total_tampil">IDR 0</span></th>
+</tr>
+
                 </tbody>
             </table>
             <!-- End Default Table Example -->
@@ -141,13 +161,38 @@ $(document).ready(function() {
     hitungTotal();
 });  
 
-    function hitungTotal() {
-        total = ongkir + <?= $total ?>;
+    function hitungTotal() { 
+    let subtotal = <?= $total ?>;
+    let ppn = subtotal * 0.11;
+    let biaya_admin = 0;
 
-        $("#ongkir").val(ongkir);
-        $("#total").html("IDR " + total.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,'));
-        $("#total_harga").val(total);
+    if (subtotal <= 20000000) {
+        biaya_admin = subtotal * 0.006;
+    } else if (subtotal <= 40000000) {
+        biaya_admin = subtotal * 0.008;
+    } else if (subtotal > 40000000) {
+        biaya_admin = subtotal * 0.01;
     }
+
+    let grand_total = subtotal + ongkir + ppn + biaya_admin;
+
+    // Set value ke input hidden
+    $("#total_harga").val(subtotal);
+    $("#ongkir").val(ongkir);
+    $("#biaya_admin").val(biaya_admin);
+    $("#ppn").val(ppn);
+    $("#grand_total").val(grand_total);
+
+    // Tampilkan di tabel
+    $("#ongkir_tampil").html(formatRupiah(ongkir)); 
+    $("#biaya_admin_tampil").html(formatRupiah(biaya_admin)); 
+    $("#ppn_tampil").html(formatRupiah(ppn)); 
+    $("#grand_total_tampil").html(formatRupiah(grand_total)); 
+}
+    function formatRupiah(angka) { 
+    return "IDR " + angka.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,');
+}
+
 });
 </script>
 <?= $this->endSection() ?>

@@ -74,12 +74,64 @@ class TransaksiController extends BaseController
     }
 
     public function checkout()
-    {
-    $data['items'] = $this->cart->contents();
-    $data['total'] = $this->cart->total();
+{
+    helper('number');
 
-    return view('v_checkout', $data);
+    $items = $this->cart->contents(); // Atau ambil dari session
+    $total = 0;
+    foreach ($items as $item) {
+        $total += $item['qty'] * $item['price'];
     }
+
+    $ongkir = 20000; // contoh tetap
+    $ppn = $total * 0.11;
+
+    // Hitung biaya admin berdasarkan syarat
+    if ($total <= 20000000) {
+        $biaya_admin = $total * 0.006;
+    } elseif ($total <= 40000000) {
+        $biaya_admin = $total * 0.008;
+    } else {
+        $biaya_admin = $total * 0.01;
+    }
+
+    $grand_total = $total + $ongkir + $ppn + $biaya_admin;
+
+    $data = [
+        'total_harga' => $total,
+        'ongkir' => $ongkir,
+        'ppn' => $ppn,
+        'biaya_admin' => $biaya_admin,
+        'grand_total' => $grand_total
+    ];
+
+    return view('v_checkout', array_merge($data, [
+        'items' => $items,
+        'total' => $total
+    ]));
+}
+
+public function prosesCheckout()
+{
+    // ambil data dari form/checkout session
+    $total_harga = $this->request->getPost('total_harga');
+    $ongkir = $this->request->getPost('ongkir');
+    $ppn = $this->request->getPost('ppn');
+    $biaya_admin = $this->request->getPost('biaya_admin');
+    $grand_total = $this->request->getPost('grand_total');
+
+    $model = new \App\Models\TransaksiModel();
+    $model->insert([
+        'total_harga' => $total_harga,
+        'ongkir' => $ongkir,
+        'ppn' => $ppn,
+        'biaya_admin' => $biaya_admin,
+        'grand_total' => $grand_total
+    ]);
+
+    return redirect()->to('/checkout/sukses');
+}
+
 
     public function getLocation()
     {

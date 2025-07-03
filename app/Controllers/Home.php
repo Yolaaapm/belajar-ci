@@ -54,21 +54,4 @@ class Home extends BaseController
     return view('v_profile', $data);
     }
 
-    public function contact()
-    {
-        return view('v_contact');
-    }
-
-    public function submitContact()
-    {
-        $nama = $this->request->getPost('nama');
-        $email = $this->request->getPost('email');
-        $pesan = $this->request->getPost('pesan');
-
-        // Simulasi penyimpanan, nanti bisa dikirim ke DB atau email
-        session()->setFlashdata('success', 'Pesan berhasil dikirim!');
-
-        return redirect()->to('contact');
-    }
-
 }
