@@ -192,39 +192,68 @@ public function prosesCheckout()
     }
 
     public function buy()
-    {
+{
     if ($this->request->getPost()) { 
+        $total_harga = (int)$this->request->getPost('total_harga');
+        $ongkir = (int)$this->request->getPost('ongkir');
+        $alamat = $this->request->getPost('alamat');
+        $username = $this->request->getPost('username');
+
+        // Hitung total produk tanpa ongkir
+        $total_produk = $total_harga - $ongkir;
+
+        // Hitung PPN 11% dari total_harga (sesuai permintaan)
+        $ppn = round($total_harga * 0.11);
+
+        // Hitung biaya admin berdasarkan total_produk
+        if ($total_produk <= 20000000) {
+            $biaya_admin = round($total_produk * 0.006);
+        } elseif ($total_produk <= 40000000) {
+            $biaya_admin = round($total_produk * 0.008);
+        } else {
+            $biaya_admin = round($total_produk * 0.01);
+        }
+
+        // Buat data untuk insert ke database
         $dataForm = [
-            'username' => $this->request->getPost('username'),
-            'total_harga' => $this->request->getPost('total_harga'),
-            'alamat' => $this->request->getPost('alamat'),
-            'ongkir' => $this->request->getPost('ongkir'),
-            'status' => 0,
-            'created_at' => date("Y-m-d H:i:s"),
-            'updated_at' => date("Y-m-d H:i:s")
+            'username'     => $username,
+            'total_harga'  => $total_harga,
+            'ongkir'       => $ongkir,
+            'alamat'       => $alamat,
+            'ppn'          => $ppn,
+            'biaya_admin'  => $biaya_admin,
+            'status'       => 0,
+            'created_at'   => date("Y-m-d H:i:s"),
+            'updated_at'   => date("Y-m-d H:i:s")
         ];
 
+        // Insert transaksi
         $this->transaction->insert($dataForm);
 
+        // Ambil ID transaksi terakhir
         $last_insert_id = $this->transaction->getInsertID();
 
+        // Simpan detail setiap produk
         foreach ($this->cart->contents() as $value) {
             $dataFormDetail = [
                 'transaction_id' => $last_insert_id,
-                'product_id' => $value['id'],
-                'jumlah' => $value['qty'],
-                'diskon' => 0,
+                'product_id'     => $value['id'],
+                'jumlah'         => $value['qty'],
+                'diskon'         => 0,
                 'subtotal_harga' => $value['qty'] * $value['price'],
-                'created_at' => date("Y-m-d H:i:s"),
-                'updated_at' => date("Y-m-d H:i:s")
+                'created_at'     => date("Y-m-d H:i:s"),
+                'updated_at'     => date("Y-m-d H:i:s")
             ];
 
             $this->transaction_detail->insert($dataFormDetail);
         }
 
+        // Hapus cart setelah transaksi
         $this->cart->destroy();
- 
+
+        // Redirect ke homepage
         return redirect()->to(base_url());
     }
-    }
+}
+
 }

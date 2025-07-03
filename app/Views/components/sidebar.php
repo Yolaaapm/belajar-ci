@@ -38,9 +38,9 @@
         </li><!-- End Profile Nav -->
 
         <li class="nav-item">
-            <a class="nav-link <?php echo (uri_string() == 'profile') ? "" : "collapsed" ?>" href="profile">
-                <i class="bi bi-person-fill"></i>
-                <span>Profile</span>
+            <a class="nav-link <?php echo (uri_string() == 'contact') ? "" : "collapsed" ?>" href="contact">
+                <i class="bi bi-person-lines-fill"></i>
+                <span>Profile Contact</span>
             </a>
         </li>
 
